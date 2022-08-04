@@ -119,7 +119,8 @@ const router = createRouter({
 });
 const guard = function(to, from, next) {  
 var sessiontoken = localStorage.getItem('SESSION');
-if(!sessiontoken){  
+if(!sessiontoken){    
+  localStorage.setItem('redirect', to.fullPath);
   window.location.href = "/login";
 }
 var data = JSON.stringify({
@@ -143,8 +144,15 @@ var data = JSON.stringify({
   window.location.href = "/verify?email=" + response.data.user.email;
     }
     window.user = response.data.user;
-    next();
-   return;
+    
+    var RedirectUrl = localStorage.getItem('redirect');
+    if(RedirectUrl){
+      localStorage.removeItem('redirect');
+      window.location.href = RedirectUrl;
+    } else {
+      next();
+      return;
+    }
   })
   .catch(function (error) {
     console.log(error);
@@ -156,7 +164,6 @@ const logout = function() {
   window.location.href = "/login";
   }
   function verifyEmail(to){
-
     var data = JSON.stringify({
       "email": to.query.email
     }); 
